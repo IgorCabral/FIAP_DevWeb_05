@@ -4,6 +4,7 @@ using fp_stack.web.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,10 +43,15 @@ namespace fp_stack.web
                         {
                             o.LoginPath = "/account/index";
                             o.AccessDeniedPath = "/account/denied";
-                          
                         });
 
-        }
+            services.Configure<GzipCompressionProviderOptions>(
+                o => o.Level = System.IO.Compression.CompressionLevel.Optimal);
+                services.AddResponseCompression(o =>
+                {
+                    o.Providers.Add<GzipCompressionProvider>();
+                });
+            }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -67,6 +73,9 @@ namespace fp_stack.web
             });
 
             app.UseAuthentication();
+
+            //Ótimo mas utilizar poder computacional
+            //app.UseResponseCompression();
 
             app.UseMvc(routes =>
             {
